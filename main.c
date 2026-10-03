@@ -43,7 +43,9 @@ void drawStudentList() {
 }
 
 void student_list(UI* ui_state) {
+	/** Printable fields **/
 	char printable_student_name[64] = {0};
+
 	for (size_t i = 0; i < app.students_count; i++)
 	{
 		if (app.students_list[i] != nullptr)
@@ -51,10 +53,7 @@ void student_list(UI* ui_state) {
 			const StudentData* student = &app.students_list[i]->data;
 
 			snprintf(printable_student_name, (sizeof("Student Name: ") + sizeof(student->name)) * sizeof(char), "Student Name: %s", student->name);
-
 			ui_print(ui_state, 0, 0, printable_student_name, sizeof(printable_student_name));
-			// printf("Student Name: %s\n", student->name);
-			// printf("#");
 
 			// // Average Score
 			// for (int i = 0; i < MAX_SCORES; i++)
@@ -111,8 +110,14 @@ int main(void) {
 		if (GetAsyncKeyState(VK_ESCAPE) < 0)
 			is_running = false;
 
+		/** Main Menu **/
+
+		// 1 - Ver alunos
 		student_list(&ui_state);
-		// ui_print(&ui_state, 0, 0, "Hello, World", sizeof("Hello, World"));
+
+		// 2 - Adicionar alunos
+		// 3 - Editar
+		// 4 - Remover
 
 		/* DEBUG */
 		// if (GetAsyncKeyState(KEY_2) < 0)
