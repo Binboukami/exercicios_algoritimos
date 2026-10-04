@@ -75,7 +75,15 @@ static void flush(UI* ui_state) {
 	}
 }
 
-static void ui_print(const UI* ui_state, int row, int col, const char* data, const size_t len) {
-	memcpy(&ui_state->next_buffer[row][col], data, sizeof(char) * len);
+static void ui_print(const UI* ui_state, int row, int col, const char* format, ...) {
+	va_list args;
+	va_start(args, format);
+
+	const int len = vsnprintf(NULL, 0, format, args);
+	char data[len + 1];
+
+	vsnprintf(data, len + 1, format, args);
+	va_end(args);
+	memcpy(&ui_state->next_buffer[row][col], data , sizeof(data));
 }
 #endif //UI_H
