@@ -45,6 +45,7 @@ void drawStudentList() {
 void student_list(UI* ui_state) {
 	/** Printable fields **/
 	char printable_student_name[64] = {0};
+	char printable_student_score_one[16] = {0};
 
 	for (size_t i = 0; i < app.students_count; i++)
 	{
@@ -53,13 +54,14 @@ void student_list(UI* ui_state) {
 			const StudentData* student = &app.students_list[i]->data;
 
 			snprintf(printable_student_name, (sizeof("Student Name: ") + sizeof(student->name)) * sizeof(char), "Student Name: %s", student->name);
-			ui_print(ui_state, 0, 0, printable_student_name, sizeof(printable_student_name));
+			ui_print(ui_state, 1, 0, printable_student_name, sizeof(printable_student_name));
 
-			// // Average Score
-			// for (int i = 0; i < MAX_SCORES; i++)
-			// {
-			// 	printf(" Nota %i: %.2f |", (1 + i), student->scores[i]);
-			// }
+			// Average Score
+			for (int i = 0; i < MAX_SCORES; i++)
+			{
+				snprintf(printable_student_score_one, (sizeof("Student Score: ") + sizeof(float)) * sizeof(char), "Score: %.2f", student->scores[i]);
+				ui_print(ui_state, 2+i, 0	, printable_student_score_one, sizeof(printable_student_score_one));
+			}
 			// printf("\n# ");
 			//
 			// printf("Media: %f \n", student->average);
