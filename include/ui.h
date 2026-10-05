@@ -54,6 +54,7 @@ static void flush(UI* ui_state) {
 		}
 	}
 
+	/** Swap buffer **/
 	matrix_ptr_t next_buffer = ui_state->next_buffer;
 
 	ui_state->next_buffer = ui_state->current_buffer;
@@ -87,3 +88,10 @@ static void ui_print(const UI* ui_state, int row, int col, const char* format, .
 	memcpy(&ui_state->next_buffer[row][col], data , sizeof(data));
 }
 #endif //UI_H
+
+static void clear_ui(UI* ui_state) {
+	memset(ui_state->buffer_a, 32, sizeof(char) * UI_ROWS * UI_COLS);
+	memset(ui_state->buffer_b, 32, sizeof(char) * UI_ROWS * UI_COLS);
+
+	flush(ui_state);
+}

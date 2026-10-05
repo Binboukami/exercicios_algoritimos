@@ -14,11 +14,6 @@
 
 Application app = { };
 
-typedef enum {
-	MAIN_MENU,
-	STUDENT_LIST
-} ui_menu_t;
-
 bool is_running = false;
 
 /*Crie um programa em linguagem C ou C++ que permita cadastrar os nomes e as três notas de até 5 alunos.
@@ -37,15 +32,32 @@ bool is_running = false;
 */
 #include "ui.h"
 
-void drawStudentList() {
-	getStudentsList();
-	/* Display more options on how to handle the options */
+void main_menu(UI* ui_state) {
+	if (GetAsyncKeyState(VK_ESCAPE) < 0)
+		is_running = false;
+
+	ui_print(ui_state, 1, 0, "1) See registered students");
+	ui_print(ui_state, 2, 0, "2) Add new student information");
+	ui_print(ui_state, 3, 0, "___________________________________________________");
+	ui_print(ui_state, 5, 0, "ESC ) Exit program");
+
+	if (GetAsyncKeyState(KEY_1) < 0) {
+		app.current_menu = STUDENT_LIST;
+		clear_ui(ui_state);
+	}
+
+	if (GetAsyncKeyState(KEY_2) < 0) {
+		app.current_menu = ADD_STUDENT;
+		clear_ui(ui_state);
+	}
 }
 
-void student_list(UI* ui_state) {
-	/** Printable fields **/
-	char printable_student_name[64] = {0};
-	char printable_student_score_one[16] = {0};
+void student_list_view(UI* ui_state) {
+
+	int info_offset = 5;
+
+	ui_print(ui_state, 1, 0, "Press 'ESC' to return to Main Menu");
+	ui_print(ui_state, 2, 0, "________________________________________________");
 
 	for (size_t i = 0; i < app.students_count; i++)
 	{
@@ -53,30 +65,64 @@ void student_list(UI* ui_state) {
 		{
 			const StudentData* student = &app.students_list[i]->data;
 
-			ui_print(ui_state, 1, 0, "Student Name: %s", student->name);
+			ui_print(ui_state, 3 + (info_offset * i), 0, "Student Name: %s", student->name);
 
-			// Average Score
-			for (int i = 0; i < MAX_SCORES; i++)
+			// Scores
+			ui_print(ui_state, 4 + (info_offset * i), 0, "Student Score One: %.2f | Student Score Two: %.2f | Student Score Three: %.2f", student->scores[0], student->scores[1], student->scores[2]);
+
+			ui_print(ui_state, 5 + (info_offset * i), 0, "Average Score: %.2f", student->average);
+			switch (student->status)
 			{
-				ui_print(ui_state, 2+i, 0, "Student Score: %.2f", student->scores[i]);
+				case APPROVED:
+					ui_print(ui_state, 6 + (info_offset * i), 0, "Status: Approved");
+					break;
+				case REPROVED:
+					ui_print(ui_state, 6 + (info_offset * i), 0, "Status: Reproved");
+					break;
 			}
-			// printf("\n# ");
-			//
-			// printf("Media: %f \n", student->average);
-			// printf("# ");
-			//
-			// printf("Status: ");
-			// switch (student->status)
-			// {
-			// 	case APPROVED:
-			// 		printf("APROVADO \n");
-			// 		break;
-			// 	case REPROVED:
-			// 		printf("REPROVADO \n");
-			// 		break;
-			// }
-			// printf("# ");
+
+			ui_print(ui_state, 7 + (info_offset * i), 0, "________________________________________________");
 		}
+	}
+
+	if (GetAsyncKeyState(VK_ESCAPE) < 0)
+	{
+		app.current_menu = MAIN_MENU;
+		clear_ui(ui_state);
+	}
+}
+
+void add_student_view(UI* ui_state) {
+
+	ui_print(ui_state, 1, 0, "Insira os dados de um aluno");
+
+	char name[NAME_MAX_SIZE - 1] = {0};
+	float first_score = 0.0f;
+	float second_score = 0.0f;
+	float third_score = 0.0f;
+
+	ui_print(ui_state, 2, 0, "Insira o nome do aluno\n");
+	fgets(name, sizeof(name), stdin);
+
+	// ui_print(ui_state, 3, 0, "Insira a primeira nota do aluno\n");
+	// scanf("%f", first_score);
+	//
+	// ui_print(ui_state, 4, 0, "Insira a segunda nota do aluno\n");
+	// scanf("%f", second_score);
+	//
+	// ui_print(ui_state, 5, 0, "Insira a terceira nota do aluno\n");
+	// scanf("%f", third_score);
+
+	if (name[0] != 0) {
+		StudentData* data = createStudent(name, first_score, second_score, third_score);
+	}
+
+	app.current_menu = MAIN_MENU;
+	clear_ui(ui_state);
+
+	if (GetAsyncKeyState(VK_ESCAPE) < 0) {
+		app.current_menu = MAIN_MENU;
+		clear_ui(ui_state);
 	}
 }
 
@@ -100,24 +146,27 @@ int main(void) {
 	const float interval = 0.000016f;
 
 	initStudentPool(&app.pool);
-	createStudent("Zezinho", 7.0f, 7.0f, 7.0f);
+	createStudent("Zezinho", 7.0f, 8.0f, 7.0f);
+	createStudent("Pedrin", 3.0f, 8.0f, 7.0f);
+
+	app.current_menu =	STUDENT_LIST;
 
 	while (is_running)
 	{
 		clock_t current_time = clock();
 		double elapsed_time = (double)(current_time - last_time) / CLOCKS_PER_SEC;
 
-		if (GetAsyncKeyState(VK_ESCAPE) < 0)
-			is_running = false;
-
-		/** Main Menu **/
-
-		// 1 - Ver alunos
-		student_list(&ui_state);
-
-		// 2 - Adicionar alunos
-		// 3 - Editar
-		// 4 - Remover
+		switch (app.current_menu) {
+			case MAIN_MENU:
+				main_menu(&ui_state);
+				break;
+			case STUDENT_LIST:
+				student_list_view(&ui_state);
+				break;
+			case ADD_STUDENT:
+				add_student_view(&ui_state);
+				break;
+		}
 
 		/* DEBUG */
 		// if (GetAsyncKeyState(KEY_2) < 0)

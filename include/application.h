@@ -11,9 +11,17 @@
 #define MAX_STUDENT_KEYS 255
 #define MAX_STUDENTS 10
 
+typedef enum {
+	MAIN_MENU,
+	STUDENT_LIST,
+	ADD_STUDENT
+} ui_menu_t;
+
 typedef struct {
 	unsigned int id_inc;
 	StudentMemoryPool pool;
+
+	ui_menu_t current_menu;
 
 	size_t students_count;
 	unsigned int student_keys[MAX_STUDENT_KEYS];
